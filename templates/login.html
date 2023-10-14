@@ -1,0 +1,47 @@
+<!--
+    Coppied from my 330 project login page
+    
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login page</title>
+</head>
+<body>
+    <form action="/login" method="POST" >
+        <p>Enter your login info:</p><br>
+        <!-- Want to sumbit the username to the webpage so you enter the users dierctory
+            Username should be a part of URL (shown in directions)               -->
+        <label >Username 
+            <input type="text" name="username_input" >
+        </label> 
+        
+        <label >Password 
+            <input type="text" name="password_input" >
+        </label>
+        
+        <input type="submit" value="Log in" name="login">
+    </form>
+
+    <br><br>
+</form>
+
+<p>Don't have an account? </p> <br>
+<form action="/create_acct" method="POST">
+    <label >Username 
+        <input type="text" name="create_username_input" >
+    </label> 
+    
+    <label >Password 
+        <input type="text" name="create_password_input" >
+    </label>
+    <label >Create an account: 
+        <input type="submit" value="Enter" name="create_acct">
+    </label>
+    
+</form>
+
+</body>
+
+</html>
