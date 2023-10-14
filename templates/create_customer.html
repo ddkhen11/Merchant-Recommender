@@ -1,12 +1,9 @@
-<!--
-    Coppied from my 330 project login page
-    
--->
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Customer</title>
     <style>
         @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
         *{
@@ -45,7 +42,7 @@
         height: 3px;
         width: 28px;
         border-radius: 12px;
-       
+
         }
         .wrapper form{
         margin-top: 30px;
@@ -103,33 +100,52 @@
         form .text h3 a:hover{
         text-decoration: underline;
         }
-
-
 </style>
 </head>
 <body>
+
+
     <div class="wrapper">
-        <h2>Log In</h2>
-        <form aaction="/login" method="POST">
-        <div class="input-box">
-            <label >Username 
-                <input type="text" name="username_input" >
-            </label> 
-        </div>
-        <div class="input-box">
-            <label >Password 
-                <input type="text" name="password_input" >
-            </label>
-        </div>
-
-        <div class="input-box button">
-            <input type="submit" value="Log in" name="login">
-        </div>
-        <div class="text">
-            <h3>Don't have an account? <a href="create_customer.html">Sign Up</a></h3>
-        </div>
+        <h2>Sign Up </h2>
+        <form action="/create_acct" method="POST">
+          <div class="input-box">
+            <label for="username">Username:</label>
+        <input type="text" id="username" placeholder = "Username" name="username" required><br>
+          </div>
+          <div class="input-box">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" placeholder = "First Name" name="firstName" required><br>
+          </div>
+          <div class="input-box">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" placeholder = "Last Name" name="lastName" required><br>
+          </div>
+          <div class="input-box">
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" placeholder = "Phone Number" name="phone" required><br>
+          </div>
+          <div class="input-box">
+            <label for="email"> Email:</label>
+            <input type="text" id="email" placeholder = "Email" name="email" required><br>
+          </div>
+          <div class="input-box">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder = "Password" name="password" required><br>
+          </div>
+          
+          <div class="policy">
+            <input type="checkbox">
+            <h3>I accept all terms & condition</h3>
+          </div>
+          <div class="input-box button">
+            <input type="Submit" value="Register Now">
+          </div>
+          <div class="text">
+            <h3>Already have an account? <a href="/login.html">Login now</a></h3>
+          </div>
         </form>
-    </div>
+      </div>
 </body>
-
 </html>
+
+

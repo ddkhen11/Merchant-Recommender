@@ -1,0 +1,29 @@
+What we want to build/work on
+
+
+WITH BANKING API:
+- Have users connect their bank account
+
+- Get transaction history
+    - identify recurring subscriptions
+    - look at cash flows into account (positive or negative) each month?
+
+    - Identify largest purchases
+    - Categorize purchases?? Food vs Utilities vs debt payments vs insurance...
+        - Give chart breaking down these expenses (matplotlib)
+
+
+OTHER:
+- have users start at login page
+    - (have them create an account?? would require a database)
+    - Have them connect to bank account login page
+
+- Get data from user
+    - 
+- Generate a dashboard with...
+    - Data user gave to us, data retrived from banking API
+
+- Use AI (openAi) to analyze transactions
+    - Use this to ____ (give recommendations on what?)
+
+https://developer.mastercard.com/open-banking-us/documentation/quick-start-guide/#5-generate-an-api-client-library
