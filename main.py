@@ -102,7 +102,7 @@ def fetch_app_token():
         raise ValueError(f"Failed to authenticate. Response: {response.text}")
 
 
-@app.route('/create_testing_customer', methods=['POST'])
+@app.route('/create_acct', methods=['POST'])
 def create_testing_customer():
     # Fetch the Finicity-App-Token
     APP_TOKEN = fetch_app_token()
@@ -117,30 +117,35 @@ def create_testing_customer():
     # Generate a unique username using a timestamp
     username = f"customer_{int(time.time())}"
 
+    password = request.form['password']
+    # salts and hashes plain text password
+    hashed_password = generate_password_hash(password)
+
+
     # Customer data to be sent in the request
     customer_data = {
-        "username": username,      # Use the generated unique username
+        "username": username,                      # Use the generated unique username
         "firstName": request.form['firstName'],    # Get first name from the form
         "lastName": request.form['lastName'],      # Get last name from the form
         "phone": request.form['phone'],            # Get phone from the form
         "email": request.form['email'],            # Get email from the form
-        "password": request.form['password']       # Get password from form
     }
+    print(customer_data)
 
     # salts and hashes plaintext password
-    hashed_password = generate_password_hash(customer_data.password)
-    customer_data["hashed_password"] = hashed_password # adds to customer_data object
+    # hashed_password = generate_password_hash(customer_data.password)
+    # customer_data["hashed_password"] = hashed_password # adds to customer_data object
 
     # implement temporary user ids now
-    example_temp_id = 123456789
-    customer_data["temp_user_id"] = example_temp_id # adds to customer_data object
+    # example_temp_id = 123456789
+    # customer_data["temp_user_id"] = example_temp_id # adds to customer_data object
 
     # insert data into database
-    data = supabase.table("user_info").insert({"temp_user_id":customer_data.temp_user_id, "first_name":customer_data.firstName, "last_name":customer_data.lastName,\
-                                               "username":customer_data.username, "phone_number":customer_data.phone, "email":customer_data.email,\
-                                                "password":customer_data.password, "hashed_password":customer_data.hashed_password}).execute()
-    data = supabase.table("user_info").select("*").execute()
-    print(data)
+    data = supabase.table("user_info").insert({"first_name":customer_data['firstName'], "last_name":customer_data['lastName'],\
+                                               "username":customer_data['username'], "phone_number":customer_data['phone'], "email":customer_data['email'],\
+                                                "hashed_password":hashed_password}).execute()
+    ## to view 'user_info' database
+    # data = supabase.table("user_info").select("*").execute()
 
     # Endpoint for creating a testing customer
     CREATE_TESTING_CUSTOMER_ENDPOINT = "https://api.finicity.com/aggregation/v2/customers/testing"
@@ -157,6 +162,10 @@ def create_testing_customer():
             customer_id_element = root.find("id")
             if customer_id_element is not None:
                 customer_id = customer_id_element.text
+
+                # session['user_id'] = customer_data['temp_user_id'] # can access session vars on any page 
+                # render_template('target_page.html', user_id=) # return with session id
+
                 return f"Testing customer created. Customer ID: {customer_id}", 201
             else:
                 return f"Error: Missing 'id' element in the XML response. Status code: {response.status_code}", 500
@@ -224,6 +233,10 @@ def create_active_customer():
 @app.route('/show_create_customer_form', methods=['GET'])
 def show_create_customer_form():
     return render_template('create_customer.html')
+
+@app.route('/login', methods=['GET'])
+def show_login():
+    return render_template('login.html')
     
 @app.route('/')
 def index():
@@ -321,64 +334,6 @@ def fetch_transactions(customer_id):
                 print(f"Failed to fetch transactions. Response content: {error_message}")
 
                 return jsonify({"error": "Failed to fetch transactions"}), response.status_code
-            
-
-#######
-
-def categorize_payee(payee_name):
-    openai.key = OPENAI_KEY
-    response = openai.ChatCompletion.create(
-    model = "gpt-3.5-turbo",
-    messages = [
-        {"role": "system", "content": "I am the world's most intelligent categorizer. Given the name of"},
-        {"role": "user", "content": "Convert this following string into latex, with the mathematical portions of this string correctly converted into the proper mathematical formatting in LaTeX. Do not output anything other than the LaTeX code in a code window. I want the resulting LaTeX code as flawless as possible, so that I can copy and paste it into a section of an existing LaTeX code body and it will compile without problems while maintaining the perfect formatting. {}".format(answer)}
-        ]
-    )
-    return response['choices'][0]['message']['content']
-    
-            
-@app.route('/recommend_vendors/<customer_id>', methods=['GET'])
-def recommend_vendors(customer_id):
-    # Fetch the customer's transactions
-    transactions_response = fetch_transactions(customer_id)
-
-    if transactions_response.status_code == 200:
-        transactions_data = transactions_response.json().get("transactions", [])
-
-        # Analyze transactions and calculate category weights
-        category_weights = {}
-        category_vendors = {
-            "Category1": ["Vendor1", "Vendor2", "Vendor3"],
-            "Category2": ["Vendor4", "Vendor5", "Vendor6"],
-            # Add more categories and vendors as needed
-        }
-
-        for transaction in transactions_data:
-            normalized_payee_name = transaction.get("normalizedPayeeName")
-            amount = transaction.get("amount")
-            category = categorize_payee(normalized_payee_name)  # Implement your categorization logic
-
-            if category:
-                # Update the category weight
-                if category in category_weights:
-                    category_weights[category] += amount
-                else:
-                    category_weights[category] = amount
-
-        # Sort categories by weight in descending order
-        sorted_categories = sorted(category_weights.items(), key=lambda x: x[1], reverse=True)
-
-        # Recommend vendors based on category weights
-        recommended_vendors = []
-        for category, _ in sorted_categories:
-            if category in category_vendors:
-                recommended_vendors.extend(category_vendors[category])
-
-        # Return the list of recommended vendors as JSON
-        return jsonify({"recommended_vendors": recommended_vendors})
-
-    else:
-        return jsonify({"error": "Failed to fetch transactions"}), transactions_response.status_code
             
 
 @app.route('/login', methods=['POST', 'GET'])

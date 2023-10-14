@@ -7,6 +7,7 @@
 <html>
 <head>
     <title>Login page</title>
+    <link rel = "stylesheet" href="../static/styles.css">
     <style>
         @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
         *{
@@ -45,7 +46,7 @@
         height: 3px;
         width: 28px;
         border-radius: 12px;
-       
+
         }
         .wrapper form{
         margin-top: 30px;
@@ -103,14 +104,13 @@
         form .text h3 a:hover{
         text-decoration: underline;
         }
-
-
 </style>
+    
 </head>
 <body>
     <div class="wrapper">
         <h2>Log In</h2>
-        <form aaction="/login" method="POST">
+        <form action="/login" method="POST">
         <div class="input-box">
             <label >Username 
                 <input type="text" name="username_input" >
@@ -126,7 +126,7 @@
             <input type="submit" value="Log in" name="login">
         </div>
         <div class="text">
-            <h3>Don't have an account? <a href="create_customer.html">Sign Up</a></h3>
+            <h3>Don't have an account? <a href="/show_create_customer_form">Sign Up</a></h3>
         </div>
         </form>
     </div>
