@@ -7,6 +7,8 @@ import json
 import time
 import requests
 import xml.etree.ElementTree as ET
+from supabase import create_client
+import openai
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -49,12 +51,9 @@ load_dotenv()
 PARTNER_ID = os.getenv("PARTNER_ID")
 PARTNER_SECRET = os.getenv("PARTNER_SECRET")
 APP_KEY = os.getenv("APP_KEY")
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 
 # database setup
-from dotenv import load_dotenv
-load_dotenv()
-
-from supabase import create_client
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_KEY") # for low level users (doesnt work right now)
@@ -83,6 +82,7 @@ def parse_xml_transactions(xml_content):
     except ET.ParseError as e:
         print(f"Failed to parse XML transactions: {str(e)}")
     return transactions
+    
 
 def fetch_app_token():
     AUTH_ENDPOINT = "https://api.finicity.com/aggregation/v2/partners/authentication"
@@ -132,9 +132,13 @@ def create_testing_customer():
     customer_data["hashed_password"] = hashed_password # adds to customer_data object
 
     # implement temporary user ids now
+    example_temp_id = 123456789
+    customer_data["temp_user_id"] = example_temp_id # adds to customer_data object
 
     # insert data into database
-    data = supabase.table("user_info").insert({"first_name":cusotmer_data.fies, "last_name":"Gonzalez"}).execute()
+    data = supabase.table("user_info").insert({"temp_user_id":customer_data.temp_user_id, "first_name":customer_data.firstName, "last_name":customer_data.lastName,\
+                                               "username":customer_data.username, "phone_number":customer_data.phone, "email":customer_data.email,\
+                                                "password":customer_data.password, "hashed_password":customer_data.hashed_password}).execute()
     data = supabase.table("user_info").select("*").execute()
     print(data)
 
@@ -317,6 +321,21 @@ def fetch_transactions(customer_id):
                 print(f"Failed to fetch transactions. Response content: {error_message}")
 
                 return jsonify({"error": "Failed to fetch transactions"}), response.status_code
+            
+
+#######
+
+def categorize_payee(payee_name):
+    openai.key = OPENAI_KEY
+    response = openai.ChatCompletion.create(
+    model = "gpt-3.5-turbo",
+    messages = [
+        {"role": "system", "content": "I am the world's most intelligent categorizer. Given the name of"},
+        {"role": "user", "content": "Convert this following string into latex, with the mathematical portions of this string correctly converted into the proper mathematical formatting in LaTeX. Do not output anything other than the LaTeX code in a code window. I want the resulting LaTeX code as flawless as possible, so that I can copy and paste it into a section of an existing LaTeX code body and it will compile without problems while maintaining the perfect formatting. {}".format(answer)}
+        ]
+    )
+    return response['choices'][0]['message']['content']
+    
             
 @app.route('/recommend_vendors/<customer_id>', methods=['GET'])
 def recommend_vendors(customer_id):
