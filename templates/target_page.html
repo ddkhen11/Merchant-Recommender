@@ -11,7 +11,7 @@
             }
             body{
 
-                    background: #4070f4;
+                    background: rgb(219, 232, 238);
             }
 
             .card {
@@ -37,7 +37,7 @@
                 background-color: #4070f4;
                 text-align: center;
                 cursor: pointer;
-                width: 100%;
+                width: 30%;
                 font-size: 18px;
                 border-radius: 8px;
                 font-weight: 500;
@@ -62,13 +62,66 @@
                 border-radius: 6px;
                 box-shadow: 0 5px 10px rgba(0,0,0,0.2);
             }
+            ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+  border-right: 1px solid rgb(219, 232, 238);
+}
+li:last-child {
+  border-right: none;
+  border-left: 1px solid rgb(219, 232, 238);
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: #111;
+}
+
+ul{
+    background-color:#4070f4 ;
+}
+            
 
         </style>
 
     </head>
 
     <body>
-
+        <ul>
+            <li>
+                <a href="/connect_to_fetch_transactions" target="_blank">Fetch Transactions</a>
+            </li>
+            <li>
+                <a href="/connect_to_connect_to_bank" target="_blank">Connect to Bank</a>
+            </li>
+            <li>
+                <a href="#p3" target="_blank">Page 3</a>
+            </li>
+            <li>
+                <a href="/dashboard" target="_blank">Page 4</a>
+            </li>
+            <li style="float:right; background-color: #4070f4;">
+                <a href="/">
+                    Log Out
+                </a>
+            </li>
+            
+        </ul>   
         <h2 style="text-align:center">Welcome to your Profile</h2>
 
 
@@ -78,27 +131,8 @@
         <h1>  {{ full_name }} </h1>
         <p class="title">{{ username }} </p>
         <p>Member ID: {{ user_id }}</p>
-
-        <!-- TODO: make buttons for what user can do  -->
-        <div style="margin: 24px 0;">
-            <button>Personalized Dashboard </button>
-            <button>Recurring Subscriptions and Payments </button>
-            <button>AI Generated Insights</button>
-
-
-            <a href="/connect_to_fetch_transactions" target="_blank" >
-                <button class="connect_btn"> Fetch Transactions </button>
-            </a>
-            <a href="/connect_to_connect_to_bank" target="_blank" >
-                <button class="connect_btn"> Connect to Bank </button>
-            </a>
-            
-        </div>
-
         
-        <a href="/index" >
-
-            
+        <a href="/">
             <p><button class= "log_out">Log Out</button></p>
         </a>
         

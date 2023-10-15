@@ -9,8 +9,10 @@ import requests
 import sys
 import xml.etree.ElementTree as ET
 from supabase import create_client
-# import openai
+import openai
 from dotenv import load_dotenv
+from functools import lru_cache
+import logging
 import pandas as pd
 
 
@@ -20,6 +22,8 @@ app.secret_key = 'secret_string'.encode('utf8')
 
 # Load environment variables from .env file
 load_dotenv()
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Retrieve your credentials from the environment variables
 PARTNER_ID = os.getenv("PARTNER_ID")
@@ -292,22 +296,115 @@ def fetch_transactions(customer_id):
             # Make the GET request to fetch transactions
             response = requests.get(endpoint, headers=headers, params=params)
 
+            # here
             if response.status_code == 200:
                 # testing...
-                print('response text:', response.text, file=sys.stderr)
+                # print('response text:', response.text, file=sys.stderr)
                 
                 transactions = parse_xml_transactions(response.text)
-                # transaction_data = jsonify({"transactions": transactions})
-                # transaction_df = pd.read_json(transaction_data)
-                return jsonify({"transactions": transactions})
-                # return transaction_df
+                # print(type(transactions[0]))
+                # print(transactions[1]['normalizedPayeeName'])
+
+                session['transaction_df'] = transactions # scary hours
+            
+                return transactions
             else:
                 # Capture and print the response content for debugging
                 error_message = response.text
                 print(f"Failed to fetch transactions. Response content: {error_message}")
 
                 return jsonify({"error": "Failed to fetch transactions"}), response.status_code
+
+openai.api_key = OPENAI_KEY
+
+@lru_cache(maxsize=100)
+def categorize_vendors(vendors):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": ("I am the world's most intelligent categorizer. Given a set of the names "
+                            "of payees, I can put every payee into one of ten categories. I will come "
+                            "up with those ten categories for every set of payees I am given.")
+            },
+            {
+                "role": "user",
+                "content": f"I am giving you a set of payees. I want you to create 10 categories that these payees "
+                           f"can be put into, and then give me back a list of those categories in this format "
+                           f"(ignoring the pointy brackets): <[category_1, category_2, ... , category_10]>. Do not "
+                           f"output anything other than the list of categories in a code window. Here is the set of "
+                           f"payees: {set(vendors)}"
+            }
+        ]
+    )
+
+    if response and response.get('choices'):
+        return response['choices'][0]['message']['content']
+    else:
+        return "Error: Invalid response from OpenAI"
+
+@lru_cache(maxsize=100)
+def categories_to_vendors(categories):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": ("I am the world's most intelligent vendor recommender. Given a list of categories, I can "
+                            "recommend the best vendors that fit in these categories (e.g. if a category is Luxury "
+                            "Clothing, I might recommend Louis Vuitton).")
+            },
+            {
+                "role": "user",
+                "content": f"I am giving you a list of categories. I want you to recommend one vendor/brand/store for "
+                           f"each category, and then give me back a list of those vendors/brands/stores in this format "
+                           f"(ignoring the pointy brackets): <[vendor_1, vendor_2, ... , vendor_10]>. Do not output "
+                           f"anything other than the list of vendors in a code window. Here is the list of categories: "
+                           f"{categories}"
+            }
+        ]
+    )
+
+    if response and response.get('choices'):
+        return response['choices'][0]['message']['content']
+    else:
+        return "Error: Invalid response from OpenAI"
+
+    
+@app.route('/recommend_vendors/<customer_id>', methods=['GET'])
+def recommend_vendors(customer_id):
+    # Fetch the customer's transactions
+    transactions = fetch_transactions(customer_id)
+
+    # Extract vendors from the transactions
+    vendors = tuple({transaction.get("normalizedPayeeName") for transaction in transactions})
+
+    # Categorize vendors using OpenAI
+    categories = categorize_vendors(vendors)
+
+    # Get recommended vendors based on the categories
+    recommended_vendors = categories_to_vendors(categories)
+
+    # Extract list from the string
+    recommended_vendors_list = recommended_vendors.strip("<>").split(",")
+    recommended_vendors_list = [vendor.strip().strip('"').strip('[').strip(']') for vendor in recommended_vendors_list]  
+    return jsonify({"recommended_vendors": recommended_vendors_list})
             
+
+@app.route('/dashboard', methods=['POST', 'GET'])
+def load_dashboard():
+    data = session['transaction_df']
+    print(data.shape)
+    print(data.columns)
+    print_list = [data]
+
+
+    print(type(transactions[0]))
+    print(transactions[1]['normalizedPayeeName'])
+
+    return print_list
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login_user():
@@ -326,4 +423,4 @@ def login_user():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
