@@ -297,7 +297,10 @@ def fetch_transactions(customer_id):
                 print('response text:', response.text, file=sys.stderr)
                 
                 transactions = parse_xml_transactions(response.text)
+                # transaction_data = jsonify({"transactions": transactions})
+                # transaction_df = pd.read_json(transaction_data)
                 return jsonify({"transactions": transactions})
+                # return transaction_df
             else:
                 # Capture and print the response content for debugging
                 error_message = response.text

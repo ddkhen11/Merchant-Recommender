@@ -15,8 +15,19 @@ def categorize_vendors(vendors):
         ]
     )
     return response['choices'][0]['message']['content']
+
+def categories_to_vendors(categories):
+    openai.key = OPENAI_KEY
+    response = openai.ChatCompletion.create(
+    model = "gpt-3.5-turbo",
+    messages = [
+        {"role": "system", "content": "I am the world's most intelligent vendor recommender. Given a list of categories, I can recommend the best vendors that fit in these categories (e.g. if a category is Luxury Clothing, I might recommend Louis Vuitton)."},
+        {"role": "user", "content": "I am giving you a list of categories. I want you to recommend one vendor/brand/store for each category, and then give me back a list of those vendors/brands/stores in this format (ignoring the pointy brackets): <[vendor_1, vendor_2, ... , vendor_10]>. Do not output anything other than the list of vendors in a code window. Here is the list of categories: {}".format(categories)}
+        ]
+    )
+    return response['choices'][0]['message']['content']
+
     
-            
 @app.route('/recommend_vendors/<customer_id>', methods=['GET'])
 def recommend_vendors(customer_id):
     # Fetch the customer's transactions
@@ -32,36 +43,11 @@ def recommend_vendors(customer_id):
             vendor = transactions_data["transactions"][i].get("normalizedPayeeName")
             vendors.add(vendor)
 
-        print(categorize_vendors(vendors))
+        categories = categorize_vendors(vendors)
+        print(categories)
 
-
-        category_weights = {}
-        category_vendors = {
-            "Category1": ["Vendor1", "Vendor2", "Vendor3"],
-            "Category2": ["Vendor4", "Vendor5", "Vendor6"],
-            # Add more categories and vendors as needed
-        }
-
-        for transaction in transactions_data:
-            normalized_payee_name = transaction.get("normalizedPayeeName")
-            amount = transaction.get("amount")
-            category = categorize_payee(normalized_payee_name)  # Implement your categorization logic
-
-            if category:
-                # Update the category weight
-                if category in category_weights:
-                    category_weights[category] += amount
-                else:
-                    category_weights[category] = amount
-
-        # Sort categories by weight in descending order
-        sorted_categories = sorted(category_weights.items(), key=lambda x: x[1], reverse=True)
-
-        # Recommend vendors based on category weights
-        recommended_vendors = []
-        for category, _ in sorted_categories:
-            if category in category_vendors:
-                recommended_vendors.extend(category_vendors[category])
+        recommended_vendors = categories_to_vendors(categories)
+        print(recommended_vendors)
 
         # Return the list of recommended vendors as JSON
         return jsonify({"recommended_vendors": recommended_vendors})
