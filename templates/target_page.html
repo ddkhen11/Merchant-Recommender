@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Main page</title>
+        <title>Main Account Page</title>
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <style>
@@ -107,7 +107,7 @@ ul{
                 <a href="/dashboard" target="_blank">Dashboard</a>
             </li>
             <li>
-                <a href="/connect_to_fetch_transactions" target="_blank">Fetch Transactions</a>
+                <a href="#" onclick="fetchTransactions()">Transactions</a>
             </li>
            
             <li>
@@ -122,11 +122,7 @@ ul{
             
         </ul>   
         <h2 style="text-align:center">Welcome to your Profile</h2>
-
-
-
         <div class="card wrapper">
-        
         <h1>  {{ full_name }} </h1>
         <p class="title">{{ username }} </p>
         <p>Member ID: {{ user_id }}</p>
@@ -138,66 +134,96 @@ ul{
       
 
     <script>
-        // Convert JSON to HTML
-        function convertJSONToHTML(jsonData) {
-                let html = '<html><head><title>Recommendations</title><style>';
-                // Add your CSS styles here
-
-                //css past here 
-
-                html += '@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap");';
-                html += 'body { font-family: "Poppins", sans-serif;  background: rgb(219, 232, 238); font-size: 20px;}';
-                html += 'div { margin: 10px; }';
-
-
-                //css ends body starts
-                html += '</style></head><body>';
-                
-    
-               
-
-
-        
-                html += '<ul>'; 
-                    for (const key in jsonData) {
-                        if (jsonData.hasOwnProperty(key)) {
-                            html += '<li>' + ${jsonData[key]}: + '</li>';
-                        }
-                    }
-                html += '</ul>';
-
-
-
-                
-                html += '</body></html>';
-                return html;
-            }
-
-            // Open the HTML content in a new tab
-            function openHTMLInNewTab(htmlContent) {
-                const newTab = window.open();
-                newTab.document.open();
-                newTab.document.write(htmlContent);
-                newTab.document.close();
-            }
+        // Open the HTML content in a new tab
+        function openHTMLInNewTab(htmlContent) {
+            const newTab = window.open();
+            newTab.document.open();
+            newTab.document.write(htmlContent);
+            newTab.document.close();
+        }
 
         async function fetchRecs() {
             try {
-                // Fetch JSON data from your Flask API endpoint
                 const response = await fetch('/connect_to_recommendations');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
                 const jsonData = await response.json();
 
-                // Convert JSON to HTML
-                const htmlContent = convertJSONToHTML(jsonData);
+                if (jsonData.recommended_vendors) {
+                    const htmlContent = convertJSONToHTML(jsonData.recommended_vendors);
+                    openHTMLInNewTab(htmlContent);
+                } else {
+                    console.error("Unexpected JSON structure:", jsonData);
+                }
+            } catch (error) {
+                console.error('Error fetching JSON:', error);
+            }
+        }
 
-                // Open the HTML content in a new tab
+        function convertJSONToHTML(vendorList) {
+            let html = '<html><head><title>Recommendations</title><style>';
+            html += '@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap");';
+            html += 'body { font-family: "Poppins", sans-serif; background: linear-gradient(to right, #4070f4, #72a0f7); font-size: 20px; display: flex; flex-direction: column; align-items: center; padding-top: 40px; }';
+            html += 'h1 { font-size: 28px; font-weight: 600; color: #333; margin-bottom: 30px; }';
+            html += 'ul { list-style-type: none; padding: 0; }';
+            html += 'li { margin: 10px 0; font-size: 22px; font-weight: 500; color: #555; }';
+            html += '</style></head><body>';
+            html += '<h1>Your Recommendations</h1>';
+            html += '<ul>';
+            for (const vendor of vendorList) {
+                html += `<li>${vendor}</li>`;
+            }
+            html += '</ul>';
+            html += '</body></html>';
+            return html;
+        }
+
+        async function fetchTransactions() {
+            try {
+                const response = await fetch('/connect_to_fetch_transactions');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const jsonData = await response.json();
+
+                // Convert the JSON to an HTML table
+                const htmlContent = convertTransactionsToHTML(jsonData);
+
+                // Display the table in a new tab
                 openHTMLInNewTab(htmlContent);
             } catch (error) {
                 console.error('Error fetching JSON:', error);
             }
-        
-            const htmlContent = convertJSONToHTML(jsonData);
-            openHTMLInNewTab(htmlContent); }
+        }
+
+        function convertTransactionsToHTML(transactions) {
+            let htmlContent = '<html><head><title>Transactions</title><style>';
+            htmlContent += '@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap");';
+            htmlContent += 'body { font-family: "Poppins", sans-serif; background: linear-gradient(to right, #4070f4, #72a0f7); font-size: 20px; display: flex; flex-direction: column; align-items: center; padding-top: 40px; }';
+            htmlContent += 'h1 { font-size: 28px; font-weight: 600; color: #333; margin-bottom: 30px; }';
+            htmlContent += '.transactions-table { width: 80%; border-collapse: collapse; margin: 25px 0; font-size: 18px; text-align: left; }';
+            htmlContent += '.transactions-table th, .transactions-table td { padding: 10px 20px; border-bottom: 1px solid #ddd; }';
+            htmlContent += '.transactions-table thead { background-color: #555; color: white; }';
+            htmlContent += '.transactions-table tbody tr:nth-child(even) { background-color: #f2f2f2; }';
+            htmlContent += '.transactions-table tbody tr:nth-child(odd) { background-color: #e7e7e7; }';
+            htmlContent += '</style></head><body>';
+            htmlContent += '<h1>Your Transactions</h1>';
+            htmlContent += "<table class='transactions-table'>";
+            htmlContent += "<thead><tr><th>Amount</th><th>Payee Name</th></tr></thead><tbody>";
+
+            // Loop through the transactions and add each one to the table
+            transactions.forEach(transaction => {
+                htmlContent += `<tr><td>${transaction.amount}</td><td>${transaction.normalizedPayeeName}</td></tr>`;
+            });
+
+            // Close the table tags
+            htmlContent += "</tbody></table></body></html>";
+
+            return htmlContent;
+        }
+
+
     </script>   
     </body>
 </html>

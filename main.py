@@ -16,6 +16,7 @@ import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 
 
 app = Flask(__name__)
@@ -63,7 +64,7 @@ def parse_xml_transactions(xml_content):
         print(f"Failed to parse XML transactions: {str(e)}")
     return transactions
     
-
+# Fetches app token from Open Banking API
 def fetch_app_token():
     AUTH_ENDPOINT = "https://api.finicity.com/aggregation/v2/partners/authentication"
     headers = {
@@ -82,6 +83,7 @@ def fetch_app_token():
         raise ValueError(f"Failed to authenticate. Response: {response.text}")
 
 
+# Creates a testing customer from the information specified in the form webpage
 @app.route('/create_acct', methods=['POST'])
 def create_testing_customer():
     # Fetch the Finicity-App-Token
@@ -210,6 +212,7 @@ def connect_to_connect_to_bank():
     user_id = session['user_id']
     return redirect(url_for('connect_to_bank', customer_id=user_id))
 
+
 @app.route('/connect_to_bank/<customer_id>', methods=['GET'])
 def connect_to_bank(customer_id):
     # Fetch the Finicity-App-Token
@@ -288,7 +291,7 @@ def _fetch_transactions(customer_id): # HELPER METHOD
             toDate_epoch = int(request.args.get('toDate', default=1697254365))  # Default: yesterday
             includePending = request.args.get('includePending', default='false')
             sort = request.args.get('sort', default='desc')
-            limit = request.args.get('limit', default=1000)  # Set your default limit value here
+            limit = request.args.get('limit', default=1000)
 
             # Define query parameters for the request
             params = {
@@ -301,9 +304,6 @@ def _fetch_transactions(customer_id): # HELPER METHOD
 
             # Make the GET request to fetch transactions
             response = requests.get(endpoint, headers=headers, params=params)
-
-            print(f"API Response Status: {response.status_code}")
-            print(f"API Response Content: {response.text}")
 
             # here
             if response.status_code == 200:
@@ -421,13 +421,10 @@ def load_dashboard():
     # print(df['Amount'].value_counts(sort=False)[0])
     # print(df['Amount'].unique())
 
-    data_to_plot = pd.DataFrame([df['Amount'].value_counts(sort=False), df['Amount'].unique()])
-
 
     matplotlib.use('agg')
-    fig = plt.figure(figsize=(20,20))
-    # ''''''
-    plt.subplot(221)
+
+
     plt.tight_layout()
     counts = df['Amount'].value_counts()
     ax = counts.iloc[:10].plot(kind="barh")
@@ -435,23 +432,37 @@ def load_dashboard():
     plt.title('Frequency of Vendors')
     plt.ylabel("Most common vendors")
     plt.xlabel("Frequency")
-    # return plt.show()'''
 
-    plt.subplot(222)
+    plt.savefig('static/vendor_freq.png', bbox_inches='tight')
+    plt.clf() # Clear the current figure.
+
+
     plt.tight_layout()
-    # labels_ = [[1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]]
+    # switched = df[['Amount', 'Vendor']]
+    # print(switched)
     sorted_ = df.sort_values(by='Vendor', ascending=False, key=lambda col: col.astype(float).abs())
-    print(sorted_)
-    # plt.bar(labels_, sorted_.iloc[:10])
+    
     ax=sorted_.iloc[:10].plot(kind="bar")
     plt.title("Largest transactions")
     plt.xlabel('Vendors')
-    plt.ylabel('Amount (USD)')
+    plt.ylabel('Dollars')
+    
+    plt.savefig('static/largest_transactions.png', bbox_inches='tight')
+    plt.clf() # Clear the current figure.
+    
 
+    plt.tight_layout()
+    y_vals = np.cumsum(df['Vendor'])
+    x_vals = np.arange(0, len(df))
+    plt.plot(x_vals, y_vals)
+    plt.xlabel('Number of Transactions')
+    plt.ylabel('Balance Outflows (USD)')
+    plt.title('Net balance over transaction history period')
+
+    plt.savefig('static/balance_value.png', bbox_inches='tight')
+    plt.clf() # Clear the current figure.
     
-    plt.savefig('static/vendor_freq.png')
-    
-    
+
 
     return render_template('plot.html')
 
