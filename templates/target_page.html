@@ -108,10 +108,7 @@ ul{
             </li>
            
             <li>
-                <a href="/connect_to_recommendations" target="_blank">Recommendations</a>
-            </li>
-            <li>
-                <a href="#" onclick="fetchJsonAndOpenHTML()" target="_blank">RTest</a>
+                <a href="#" onclick="fetchRecs()">Recommendations</a>
             </li>
             <li>
                 <a href="/dashboard" target="_blank">Go to dashboard</a>
@@ -143,7 +140,7 @@ ul{
 
     <script>
         document.getElementById("openHTMLButton").addEventListener("click", function() {
-            fetchJsonAndOpenHTML();
+            fetchRecs();
         });
 
         // Convert JSON to HTML
@@ -163,7 +160,7 @@ ul{
                 html += '<ul>'; 
                 for (const key in jsonData) {
                     if (jsonData.hasOwnProperty(key)) {
-                        html += `<div><strong>${key}:</strong> ${jsonData[key]}</div>`;
+                        html += `<div><strong>${key}:</strong> ${jsonData[key]}<br></br></div>`;
                     }
                 }
                 html += '</ul>';
@@ -181,7 +178,7 @@ ul{
                 newTab.document.close();
             }
 
-        async function fetchJsonAndOpenHTML() {
+        async function fetchRecs() {
             try {
                 // Fetch JSON data from your Flask API endpoint
                 const response = await fetch('/connect_to_recommendations');
