@@ -15,6 +15,7 @@ from functools import lru_cache
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 
 
 app = Flask(__name__)
@@ -413,35 +414,31 @@ def load_dashboard():
     for transaction in data:
         df.loc[len(df.index)] = [transaction['amount'], transaction['normalizedPayeeName']]
 
+    print(df)
     print(df.shape) # 111, 2
     print(df.columns) # Index(['Vendor', 'Amount'], dtype='object')
-    print(df['Amount'].value_counts()) # good
+    print(df['Amount'].value_counts(sort=False)) # good
+    print(df['Amount'].value_counts(sort=False)[0])
     print(df['Amount'].unique())
 
+    col1 = df['Amount'].value_counts()
+    print(col1[:10])
+    # col2 = 
+
+
     data_to_plot = pd.DataFrame([df['Amount'].value_counts(sort=False), df['Amount'].unique()])
-    # data_to_plot.columns = ['Vendor', 'Frequency']
 
-    # shortened_data_to_plot = data_to_plot['1']
-
-    print("Shortened data:::::::")    
-    print(data_to_plot[:10])
-    print(data_to_plot.shape)
-
-    '''
-    plt.bar(data_to_plot[0][:10], data_to_plot[1][:10])
+    matplotlib.use('agg')
+    # plt.bar(col1)
+    counts = df['Amount'].value_counts()
+    ax = counts.iloc[:10].plot(kind="barh")
+    ax.invert_yaxis()
     plt.title('Frequency of Vendors')
     plt.xlabel("Most common vendors")
     plt.ylabel("Frequency")
-    # plt.show()
+    # return plt.show()
     plt.savefig('static/plot.png')
-    '''
-
-
-
-    # print_list = df.to_dict()
-    # print_list = [df.shape, df.columns, df.value_counts]
-
-
+    
     
 
     return render_template('plot.html')
