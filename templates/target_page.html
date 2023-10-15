@@ -37,7 +37,7 @@
                 background-color: #4070f4;
                 text-align: center;
                 cursor: pointer;
-                width: 30%;
+                width: 50%;
                 font-size: 18px;
                 border-radius: 8px;
                 font-weight: 500;
@@ -106,14 +106,12 @@ ul{
             <li>
                 <a href="/connect_to_fetch_transactions" target="_blank">Fetch Transactions</a>
             </li>
+           
             <li>
-                <a href="/connect_to_connect_to_bank" target="_blank">Connect to Bank</a>
+                <a href="/connect_to_recommendations" target="_blank">Recommendations</a>
             </li>
             <li>
-                <a href="#p3" target="_blank">Page 3</a>
-            </li>
-            <li>
-                <a href="/dashboard" target="_blank">Page 4</a>
+                <a href="/dashboard" target="_blank">Go to dashboard</a>
             </li>
             <li style="float:right; background-color: #4070f4;">
                 <a href="/">
@@ -132,29 +130,12 @@ ul{
         <p class="title">{{ username }} </p>
         <p>Member ID: {{ user_id }}</p>
         
-        <a href="/">
-            <p><button class= "log_out">Log Out</button></p>
+        <a href="/connect_to_connect_to_bank" target="_blank">
+            <p><button class= "log_out">Connect to Bank</button></p>
         </a>
         
-       
+    
 
 
-
-                
-            <!--    Main html page -->
-                <!-- <h4>Congrats you made it to this page</h4>
-                <br>
-                <p>
-                    USERNAME: {{ username }} <br>
-                    NAME: {{ full_name }} <br>
-                    USER ID: {{ user_id }}
-                </p>
-              
-
-                <a href="/connect_to_fetch_transactions" >
-                    <button class="connect_btn"> Fetch Transactions </button></div>
-                </a> -->
-
-                
     </body>
 </html>

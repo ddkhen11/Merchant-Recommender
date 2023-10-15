@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from functools import lru_cache
 import logging
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 app = Flask(__name__)
@@ -244,8 +245,12 @@ def connect():
     customer_id = session['user_id']
     return redirect(url_for('fetch_transactions', customer_id=customer_id))
 
-@app.route('/fetch_transactions/<customer_id>', methods=['GET'])
-def fetch_transactions(customer_id):
+@app.route('/connect_to_recommendations', methods=['POST', 'GET'])
+def connect_to_recommendations():
+    customer_id = session['user_id']
+    return redirect(url_for('recommend_vendors', customer_id=customer_id))
+
+def _fetch_transactions(customer_id): # HELPER METHOD
     # Fetch the Finicity-App-Token
     APP_TOKEN = fetch_app_token()
 
@@ -296,16 +301,20 @@ def fetch_transactions(customer_id):
             # Make the GET request to fetch transactions
             response = requests.get(endpoint, headers=headers, params=params)
 
+            print(f"API Response Status: {response.status_code}")
+            print(f"API Response Content: {response.text}")
+
             # here
             if response.status_code == 200:
                 # testing...
                 # print('response text:', response.text, file=sys.stderr)
                 
-                transactions = parse_xml_transactions(response.text)
+                transactions = parse_xml_transactions(response.text) # returns a list of dictionaries
                 # print(type(transactions[0]))
                 # print(transactions[1]['normalizedPayeeName'])
 
-                session['transaction_df'] = transactions # scary hours
+                # df = pd.DataFrame(transactions) # doesnt work
+                session['transaction'] = transactions # scary hours
             
                 return transactions
             else:
@@ -314,6 +323,11 @@ def fetch_transactions(customer_id):
                 print(f"Failed to fetch transactions. Response content: {error_message}")
 
                 return jsonify({"error": "Failed to fetch transactions"}), response.status_code
+
+@app.route('/fetch_transactions/<customer_id>', methods=['GET'])
+def fetch_transactions(customer_id):
+    transactions = _fetch_transactions(customer_id)
+    return jsonify(transactions)
 
 openai.api_key = OPENAI_KEY
 
@@ -375,7 +389,7 @@ def categories_to_vendors(categories):
 @app.route('/recommend_vendors/<customer_id>', methods=['GET'])
 def recommend_vendors(customer_id):
     # Fetch the customer's transactions
-    transactions = fetch_transactions(customer_id)
+    transactions = _fetch_transactions(customer_id)
 
     # Extract vendors from the transactions
     vendors = tuple({transaction.get("normalizedPayeeName") for transaction in transactions})
@@ -394,16 +408,43 @@ def recommend_vendors(customer_id):
 
 @app.route('/dashboard', methods=['POST', 'GET'])
 def load_dashboard():
-    data = session['transaction_df']
-    print(data.shape)
-    print(data.columns)
-    print_list = [data]
+    data = session['transaction']
+    df = pd.DataFrame(columns=['Vendor', 'Amount'])
+    for transaction in data:
+        df.loc[len(df.index)] = [transaction['amount'], transaction['normalizedPayeeName']]
+
+    print(df.shape) # 111, 2
+    print(df.columns) # Index(['Vendor', 'Amount'], dtype='object')
+    print(df['Amount'].value_counts()) # good
+    print(df['Amount'].unique())
+
+    data_to_plot = pd.DataFrame([df['Amount'].value_counts(sort=False), df['Amount'].unique()])
+    # data_to_plot.columns = ['Vendor', 'Frequency']
+
+    # shortened_data_to_plot = data_to_plot['1']
+
+    print("Shortened data:::::::")    
+    print(data_to_plot[:10])
+    print(data_to_plot.shape)
+
+    '''
+    plt.bar(data_to_plot[0][:10], data_to_plot[1][:10])
+    plt.title('Frequency of Vendors')
+    plt.xlabel("Most common vendors")
+    plt.ylabel("Frequency")
+    # plt.show()
+    plt.savefig('static/plot.png')
+    '''
 
 
-    print(type(transactions[0]))
-    print(transactions[1]['normalizedPayeeName'])
 
-    return print_list
+    # print_list = df.to_dict()
+    # print_list = [df.shape, df.columns, df.value_counts]
+
+
+    
+
+    return render_template('plot.html')
 
 
 @app.route('/login', methods=['POST', 'GET'])

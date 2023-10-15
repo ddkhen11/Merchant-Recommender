@@ -50,6 +50,7 @@ def recommend_vendors(customer_id):
         print(recommended_vendors)
 
         # Return the list of recommended vendors as JSON
+
         return jsonify({"recommended_vendors": recommended_vendors})
 
     else:
