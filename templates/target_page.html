@@ -104,15 +104,16 @@ ul{
     <body>
         <ul>
             <li>
+                <a href="/dashboard" target="_blank">Dashboard</a>
+            </li>
+            <li>
                 <a href="/connect_to_fetch_transactions" target="_blank">Fetch Transactions</a>
             </li>
            
             <li>
                 <a href="#" onclick="fetchRecs()">Recommendations</a>
             </li>
-            <li>
-                <a href="/dashboard" target="_blank">Go to dashboard</a>
-            </li>
+            
             <li style="float:right; background-color: #4070f4;">
                 <a href="/">
                     Log Out
@@ -136,34 +137,36 @@ ul{
         
       
 
-    <button id="openHTMLButton">Generate & Open Styled HTML</button>
-
     <script>
-        document.getElementById("openHTMLButton").addEventListener("click", function() {
-            fetchRecs();
-        });
-
         // Convert JSON to HTML
         function convertJSONToHTML(jsonData) {
                 let html = '<html><head><title>Recommendations</title><style>';
                 // Add your CSS styles here
 
                 //css past here 
-                html += 'body { font-family: Arial, sans-serif;  background: rgb(219, 232, 238);}';
-                html += 'div { margin: 10px; }';
 
+                html += '@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap");';
+                html += 'body { font-family: "Poppins", sans-serif;  background: rgb(219, 232, 238); font-size: 20px;}';
+                html += 'div { margin: 10px; }';
 
 
                 //css ends body starts
                 html += '</style></head><body>';
                 
+    
+               
+
+
+        
                 html += '<ul>'; 
-                for (const key in jsonData) {
-                    if (jsonData.hasOwnProperty(key)) {
-                        html += `<div><strong>${key}:</strong> ${jsonData[key]}<br></br></div>`;
+                    for (const key in jsonData) {
+                        if (jsonData.hasOwnProperty(key)) {
+                            html += '<li>' + ${jsonData[key]}: + '</li>';
+                        }
                     }
-                }
                 html += '</ul>';
+
+
 
                 
                 html += '</body></html>';

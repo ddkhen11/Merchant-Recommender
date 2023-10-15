@@ -414,30 +414,42 @@ def load_dashboard():
     for transaction in data:
         df.loc[len(df.index)] = [transaction['amount'], transaction['normalizedPayeeName']]
 
-    print(df)
-    print(df.shape) # 111, 2
-    print(df.columns) # Index(['Vendor', 'Amount'], dtype='object')
-    print(df['Amount'].value_counts(sort=False)) # good
-    print(df['Amount'].value_counts(sort=False)[0])
-    print(df['Amount'].unique())
-
-    col1 = df['Amount'].value_counts()
-    print(col1[:10])
-    # col2 = 
-
+    # print(df)
+    # print(df.shape) # 111, 2
+    # print(df.columns) # Index(['Vendor', 'Amount'], dtype='object')
+    # print(df['Amount'].value_counts(sort=False)) # good
+    # print(df['Amount'].value_counts(sort=False)[0])
+    # print(df['Amount'].unique())
 
     data_to_plot = pd.DataFrame([df['Amount'].value_counts(sort=False), df['Amount'].unique()])
 
+
     matplotlib.use('agg')
-    # plt.bar(col1)
+    fig = plt.figure(figsize=(20,20))
+    # ''''''
+    plt.subplot(221)
+    plt.tight_layout()
     counts = df['Amount'].value_counts()
     ax = counts.iloc[:10].plot(kind="barh")
     ax.invert_yaxis()
     plt.title('Frequency of Vendors')
-    plt.xlabel("Most common vendors")
-    plt.ylabel("Frequency")
-    # return plt.show()
-    plt.savefig('static/plot.png')
+    plt.ylabel("Most common vendors")
+    plt.xlabel("Frequency")
+    # return plt.show()'''
+
+    plt.subplot(222)
+    plt.tight_layout()
+    # labels_ = [[1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]]
+    sorted_ = df.sort_values(by='Vendor', ascending=False, key=lambda col: col.astype(float).abs())
+    print(sorted_)
+    # plt.bar(labels_, sorted_.iloc[:10])
+    ax=sorted_.iloc[:10].plot(kind="bar")
+    plt.title("Largest transactions")
+    plt.xlabel('Vendors')
+    plt.ylabel('Amount (USD)')
+
+    
+    plt.savefig('static/vendor_freq.png')
     
     
 
