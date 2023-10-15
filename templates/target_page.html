@@ -2,25 +2,125 @@
 <html>
     <head>
         <title>Main page</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <style>
+            @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+            *{
+              font-family: 'Poppins', sans-serif;
+            }
+            body{
+
+                    background: #4070f4;
+            }
+
+            .card {
+                background-color: white;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            margin: auto;
+            text-align: center;
+            }
+
+            .title {
+            color: grey;
+            font-size: 18px;
+            }
+
+            .log_out {
+                border: none;
+                outline: 0;
+                display: inline-block;
+                padding: 8px;
+                color: white;
+                
+                background-color: #4070f4;
+                text-align: center;
+                cursor: pointer;
+                width: 100%;
+                font-size: 18px;
+                border-radius: 8px;
+                font-weight: 500;
+            }
+
+            a {
+            text-decoration: none;
+            font-size: 22px;
+            color: black;
+            }
+
+            .log_out:hover, a:hover {
+                background-color: #0e4bf1; 
+            }
+
+            .wrapper{
+                position: relative;
+                max-width: 430px;
+                width: 100%;
+                background: #fff;
+                padding: 34px;
+                border-radius: 6px;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+
+        </style>
+
     </head>
+
     <body>
-        
-        <!--    Main html page -->
-        <h4>Congrats you made it to this page</h4>
-        <br>
-        <p>Please log into your bank account so we can generate a dashboard and insights for you.</p>
-        <br>
-        <p>
-            Redirect yourself to any page below...
-            <br>This app allows you to do:
-            <ul>
-                <li>View your personalized dashboard</li>
-                <li>Look at recurring subscriptions and payments</li>
-                <li>Use AI to generate insights</li>
-            </ul>
-        </p>
+
+        <h2 style="text-align:center">Welcome to your Profile</h2>
 
 
+
+        <div class="card wrapper">
         
+        <h1>  {{ full_name }} </h1>
+        <p class="title">{{ username }} </p>
+        <p>Member ID: {{ user_id }}</p>
+
+        <!-- TODO: make buttons for what user can do  -->
+        <div style="margin: 24px 0;">
+            <button>Personalized Dashboard </button>
+            <button>Recurring Subscriptions and Payments </button>
+            <button>AI Generated Insights</button>
+
+
+            <a href="/connect_to_fetch_transactions" >
+                <button class="connect_btn"> Fetch Transactions </button>
+            </a>
+            <a href="/connect_to_connect_to_bank" >
+                <button class="connect_btn"> Connect to Bank </button>
+            </a>
+            
+        </div>
+
+        
+        <a href="/index" >
+
+            
+            <p><button class= "log_out">Log Out</button></p>
+        </a>
+        
+       
+
+
+
+                
+            <!--    Main html page -->
+                <!-- <h4>Congrats you made it to this page</h4>
+                <br>
+                <p>
+                    USERNAME: {{ username }} <br>
+                    NAME: {{ full_name }} <br>
+                    USER ID: {{ user_id }}
+                </p>
+              
+
+                <a href="/connect_to_fetch_transactions" >
+                    <button class="connect_btn"> Fetch Transactions </button></div>
+                </a> -->
+
+                
     </body>
 </html>

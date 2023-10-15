@@ -1,48 +1,22 @@
-from flask import Flask, render_template, redirect, jsonify, request
-from flask_session import Session 
+from flask import Flask, render_template, redirect, jsonify, request, session, url_for
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy 
 from werkzeug.security import generate_password_hash, check_password_hash # new
 import os
 import json
 import time
 import requests
+import sys
 import xml.etree.ElementTree as ET
 from supabase import create_client
-import openai
+# import openai
 from dotenv import load_dotenv
+import pandas as pd
+
 
 app = Flask(__name__)
+app.secret_key = 'secret_string'.encode('utf8')
 
-## Setting up Subabase DB -->
-""" DB_PASSWORD = 'DanielKhen123!' # Dont touch
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{DB_PASSWORD}@db.zwyjalcsnvikahllbkxm.supabase.co:5432/postgres'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_TYPE'] = 'filesystem'
-
-Session(app)
-db = SQLAlchemy(app)
-
-class users(db.Model):
-    __tablename__ = 'user_info'
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(25), nullable=False)
-    last_name = db.Column(db.String(25), nullable=False)
-    username = db.Column(db.String(25), nullable=False)
-    email = db.Column(db.String(255), nullable=False)
-    phone_number = db.Column(db.Unicode(255), nullable=True)
-    hashed_password = db.Column(db.String(255), nullable=False)
-    
-    def __init__(self, first_name, last_name, username, email, phone_number, hashed_password):
-        self.first_name = first_name
-        self.last_name = last_name        
-        self.username = username
-        self.email = email
-        self.phone_number = phone_number
-        self.hashed_password = hashed_password
-    
-    def __repr__(self):
-        return f'<User: {self.username}' """
 
 # Load environment variables from .env file
 load_dotenv()
@@ -116,6 +90,7 @@ def create_testing_customer():
 
     # Generate a unique username using a timestamp
     username = f"customer_{int(time.time())}"
+    # but we need username to login?
 
     password = request.form['password']
     # salts and hashes plain text password
@@ -163,10 +138,12 @@ def create_testing_customer():
             if customer_id_element is not None:
                 customer_id = customer_id_element.text
 
-                # session['user_id'] = customer_data['temp_user_id'] # can access session vars on any page 
-                # render_template('target_page.html', user_id=) # return with session id
+                session['user_id'] = customer_id # can access session vars on any page 
+                session['full_name'] = customer_data['firstName'] + ' ' + customer_data['lastName']
+                session['username'] = customer_data['username']
+                return render_template('target_page.html', user_id=session['user_id'], username=session['username'], full_name=session['full_name']) # return with session id
 
-                return f"Testing customer created. Customer ID: {customer_id}", 201
+                # return f"Testing customer created. Customer ID: {customer_id}", 201
             else:
                 return f"Error: Missing 'id' element in the XML response. Status code: {response.status_code}", 500
         except ET.ParseError:
@@ -175,60 +152,7 @@ def create_testing_customer():
     else:
         # Handle the error case
         return f"Error creating testing customer. Status code: {response.status_code}", 500
-    
-""" @app.route('/create_active_customer', methods=['POST'])
-def create_active_customer():
-    # Fetch the Finicity-App-Token
-    APP_TOKEN = fetch_app_token()
-
-    # Headers for the create active customer request
-    headers = {
-        "Content-Type": "application/json",
-        "Finicity-App-Token": APP_TOKEN,
-        "Finicity-App-Key": APP_KEY,
-    }
-
-    # Customer data to be sent in the request
-    customer_data = {
-        "username": request.form['username'],
-        "firstName": request.form['firstName'],
-        "lastName": request.form['lastName'],
-        "phone": request.form['phone'],
-        "email": request.form['email'],
-        "password": request.form['password'],
-        "applicationId": "123456789"  # Include the applicationId as required
-    }
-
-    # salts and hashes plaintext password
-    hashed_password = generate_password_hash(customer_data.password)
-    customer_data["hashed_password"] = hashed_password
-
-    user_info_entry = user_info(customer_data.first_name, customer_data.last_name, customer_data.username, \
-            customer_data.email, customer_data.phone_number, customer_data.hashed_password)
-
-    ##!! From here on (to end of function) is for creating an active user; This is a PAID feature of this API that we wont use for this project
-    ##      Using data from demo customers that Mastercard provides
-    ##      We are still adding functionaility for users to create accounts above
-
-    # Endpoint for creating an active customer
-    CREATE_ACTIVE_CUSTOMER_ENDPOINT = "https://api.finicity.com/aggregation/v2/customers/active"
-
-    # Make a POST request to create the active customer
-    response = requests.post(CREATE_ACTIVE_CUSTOMER_ENDPOINT, headers=headers, json=customer_data)
-        # this gives back customer_id
-
-    # Check the response status code
-    if response.status_code == 201:
-        # Active customer was successfully created
-        # Parse the JSON response to extract the customer ID
-        response_data = response.json()
-        customer_id = response_data.get('id')
-        return f"Active customer created. Customer ID: {customer_id}", 201
-    else:
-        # Handle the error case
-        return f"Error creating active customer. Status code: {response.status_code}. " \
-               f"Message: {response.text}", 500 """
-    
+        
 
 @app.route('/show_create_customer_form', methods=['GET'])
 def show_create_customer_form():
@@ -238,9 +162,47 @@ def show_create_customer_form():
 def show_login():
     return render_template('login.html')
     
+@app.route('/check_login', methods=['POST', 'GET'])
+def check_login():
+    username = request.form['username_input']
+    password_guess = request.form['password_input']
+
+    # find password corresponding to given username
+    returned_password = supabase.table("user_info").select("hashed_password").eq("username", f"{username}").execute()
+    as_list = list(returned_password)
+    db_password = as_list[0][1][0]['hashed_password']
+
+    if check_password_hash(db_password, password_guess):
+        #get first name
+        returned_firstname = supabase.table("user_info").select("first_name").eq("username", f"{username}").execute()
+        as_list = list(returned_firstname)
+        first_name = as_list[0][1][0]['first_name']
+
+        #get last name
+        returned_lastname = supabase.table("user_info").select("last_name").eq("username", f"{username}").execute()
+        as_list = list(returned_lastname)
+        last_name = as_list[0][1][0]['last_name']
+
+        user_id = 7006562263 ## !! ASSIGN USER ID TO SESSION VARIABLE !!
+        session['username'] = username
+        session['user_id'] = user_id
+        session['full_name'] = first_name + ' ' + last_name
+        
+        print('\nLogin Successful\n')
+        return render_template('target_page.html', user_id=session['user_id'], username=session['username'], full_name=session['full_name'])
+    else: ## error occurs because indexing sql query returns out of bounds... fix needed
+        print("\nPassword or username incorrect. Try again\n")
+        return render_template('index.html')
+        
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/connect_to_connect_to_bank', methods=['POST', 'GET'])
+def connect_to_connect_to_bank():
+    user_id = session['user_id']
+    return redirect(url_for('connect_to_bank', customer_id=user_id))
 
 @app.route('/connect_to_bank/<customer_id>', methods=['GET'])
 def connect_to_bank(customer_id):
@@ -272,6 +234,11 @@ def connect_to_bank(customer_id):
 
     # Redirect the user to the Connect URL
     return redirect(connect_url)
+
+@app.route('/connect_to_fetch_transactions', methods=['POST', 'GET'])
+def connect():
+    customer_id = session['user_id']
+    return redirect(url_for('fetch_transactions', customer_id=customer_id))
 
 @app.route('/fetch_transactions/<customer_id>', methods=['GET'])
 def fetch_transactions(customer_id):
@@ -326,6 +293,9 @@ def fetch_transactions(customer_id):
             response = requests.get(endpoint, headers=headers, params=params)
 
             if response.status_code == 200:
+                # testing...
+                print('response text:', response.text, file=sys.stderr)
+                
                 transactions = parse_xml_transactions(response.text)
                 return jsonify({"transactions": transactions})
             else:

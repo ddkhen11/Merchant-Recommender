@@ -6,46 +6,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+      html,body,h1,h2,h3,h4 {font-family:"Poppins", sans-serif}
+      .mySlides {display:none}
+      .w3-tag, .fa {cursor:pointer}
+      .w3-tag {height:15px;width:15px;padding:0;margin-top:6px}
 
+      .login_btn{
+        background-color :#4070f4; 
+        color: white;
+        border-radius: 8px;
+        border : 0px;
+        padding: 10px;
+        width: 20%;
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .login_btn:hover {
+        background-color: #0e4bf1;
+      }
+
+
+      .bgimg {
+        background-position: center;
+        background-size: cover;
+        max-height: 50%;
+        width: 100%;
+        object-fit: cover;
+      }
+
+      
+    </style>
 </head>
 <body >
 
+  <!-- <div class="bgimg w3-display-container w3-grayscale-min">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Test-Logo.svg/1200px-Test-Logo.svg.png" alt="Shopping Image" width="1600" height="800">
+  </div> -->
 
-    <div style="letter-spacing:4px;">
-      <a href="index.html" >Merchant Recommender</a>
-      <div class = "input-box button" >
 
-        <div class="wrapper">
-        <a href="/login" >Log In</a>
-        </div>
-      </div>
+  <header class="w3-display-container w3-content w3-wide bgimg" style="max-height:8000px;min-width:500px" id="home" style = "width: 100%;">
+    <img class="w3-image w3-opacity" src="https://img.freepik.com/premium-photo/pink-piggy-bank-wooden-table-concept-storage_218381-8546.jpg" width = 100%>
+    <div class="w3-display-topleft w3-padding-large">
+      <h1 class="w3-xxlarge"><strong>Welcome to SpendAdvisor</h1>
     </div>
-
-    <header style="max-width:1600px;min-width:500px" id="home">
-        <img src="/homePageImage.jpeg" alt="Shopping Image" width="1600" height="800">
-    </header>
-
-    
-    <!-- <a href="/connect_to_bank" class = "button">Connect to Your Bank</a> -->
+  </header>
 
   
-</body>
-</html>
 
-
-
-<style>
-html,body,h1,h2,h3,h4 {font-family:"Lato", sans-serif}
-.mySlides {display:none}
-.w3-tag, .fa {cursor:pointer}
-.w3-tag {height:15px;width:15px;padding:0;margin-top:6px}
-</style>
-</head>
-<body>
-
+    
 <!-- Links (sit on top) 
 <div class="w3-top">
   <div class="w3-row w3-large w3-light-grey">
@@ -63,31 +74,38 @@ html,body,h1,h2,h3,h4 {font-family:"Lato", sans-serif}
 -->
 
 <!-- Content -->
-<div class="w3-content" style="max-width:1100px;margin-top:80px;margin-bottom:80px">
-  <div class="w3-panel">
-    <h1><b>Welcome to [name??]</b></h1>
+<div class="w3-content" style="max-width:1100px;margin-top:10px;margin-bottom:10px">
+  <div class="w3-panel w3-xlarge w3-padding-16 w3-center">
   </div>
-  <div class="wrapper">
-    <a href="/login" >Log In</a>
+  <div class="wrapper w3-center">
+    <a href="/login" >
+      <button class="login_btn" style="box-shadow: 0 5px 10px rgba(0,0,0,0.2);"> Log In </button>
+    </a>
     </div>
   <!-- Grid -->
-  <div class="w3-row w3-container">
-    <div class="w3-center w3-padding-64">
-      <span class="w3-xlarge w3-bottombar w3-border-dark-grey w3-padding-16">What We Offer</span>
-    </div>
-    <div class="w3-col l3 m6 w3-light-blue w3-container w3-padding-16">
-      <h3>View your personalized dashboard and insights</h3>
-    </div>
-    <div class="w3-col l3 m6 w3-blue w3-container w3-padding-16">
-      <h3>Look at recurring subscriptions and payments</h3>
-    </div>
-    <div class="w3-col l3 m6 w3-container w3-padding-16" >
-      <h3>Use AI to generate insights</h3>
-    </div>
+  <div class=" w3-row w3-container w3-center">
+      <div class="w3-center w3-padding-64 w3-center">
+        <span class="w3-xlarge w3-bottombar w3-border-dark-grey w3-padding-16">What We Offer</span>
+      </div>
+      <div class="w3-container w3-padding-16" style = "margin-left: auto; margin-right: auto; width:70%; background-color : rgb(106, 186, 239); color: white; border-radius: 12px; box-shadow: 0 5px 10px rgba(0,0,0,0.2);" >
+        <h3>View your personalized dashboard</h3>
+      </div>
+      <br>
+      <div class="w3-blue w3-container w3-padding-16" style = "margin-left: auto; margin-right: auto; width:70%; border-radius: 12px; box-shadow: 0 5px 10px rgba(0,0,0,0.2);">
+        <h3>Track recurring subscriptions and payments</h3>
+      </div>
+      <br>
+      <div class="w3-container w3-padding-16"  style = "margin-left: auto; margin-right: auto; width:70%; background-color : #4070f4; color: white;border-radius: 12px; box-shadow: 0 5px 10px rgba(0,0,0,0.2);" >
+        <h3>Generate insights using AI</h3>
+      </div>
   </div>
 
-  
 
+
+</body>
+
+  
+</html>
   
 
 

@@ -8,6 +8,7 @@ import time
 import requests
 import xml.etree.ElementTree as ET
 # from dotenv import load_dotenv
+import pandas as pd
 
 # new
 from dotenv import load_dotenv
@@ -29,11 +30,26 @@ supabase = create_client(url, key_override)
 #     print(f"Error: {str(e)}")
 
 # to insert data
-data = supabase.table("user_info").insert({"first_name":"Tony", "last_name":"Gonzalez"}).execute()
-data = supabase.table("user_info").select("*").execute()
-print(data)
+# data = supabase.table("user_info").insert({"first_name":"Tony", "last_name":"Gonzalez"}).execute()
+data = supabase.table("user_info").select("hashed_password").eq("username", "no").execute()
+
+list_data = list(data)
+
+# if(check_password_hash(list_data[0][1][0]['hashed_password'], '123')):
+    # print('\nSUCCESS\n')
+
+# print(list_data[0][1][0]['hashed_password'])
 
 
+r = pd.to_datetime(1607450357)
+print(r)
+
+url = 'https://api.finicity.com/aggregation/v3/customers/7006562263/transactions?fromDate=1607450357&toDate=1607450357&start=1&limit=1&sort=desc'
+response = requests.get(url)
+
+print(response.text)
+# data = response.json()
+# print(jsonify(data))
 
 
 
